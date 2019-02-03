@@ -410,6 +410,24 @@ function addace(msg, name, guildName, guildUrl)
   let members = ''
   let currentMembers = getAceMembers()
 
+  if(guildName != 'Rockefeller' || guildName != 'ACE')
+  {
+    msg.channel.send(
+      {
+        embed: {
+          color: 0xff3333,
+          author:
+          {
+            name: guildName,
+            icon_url: guildUrl
+          },
+            description: `${guildName} n\'a pas la permission de changer les membres de l\'unité ACE`
+          }
+        })
+
+      return
+  }
+
   if(currentMembers != null)
   {
     if(currentMembers.lastIndexOf(name) > -1)
@@ -459,6 +477,24 @@ function removeace(msg, name, guildName, guildUrl)
   let members = ''
   let currentMembers = getAceMembers()
 
+  if(guildName != 'Rockefeller' || guildName != 'ACE')
+  {
+    msg.channel.send(
+      {
+        embed: {
+          color: 0xff3333,
+          author:
+          {
+            name: guildName,
+            icon_url: guildUrl
+          },
+            description: `${guildName} n\'a pas la permission de changer les membres de l\'unité ACE`
+          }
+        })
+
+      return
+  }
+  
   if(currentMembers == null)
   {
      msg.channel.send(
@@ -509,7 +545,7 @@ function removeace(msg, name, guildName, guildUrl)
         color: 0x47E77A,
         author:
         {
-          name: 'Rockefeller',
+          name: guildName,
           icon_url: guildUrl
         },
         description: `ACE: Le joueur ${name} a été retiré`
@@ -530,7 +566,7 @@ function listace(msg, guildName, guildUrl)
           color: 0xff3333,
           author:
           {
-            name: 'Rockefeller',
+            name: guildName,
             icon_url: guildUrl
           },
           description: 'ACE: Il n\'y a pas de joueur ajouté'
@@ -552,7 +588,7 @@ function listace(msg, guildName, guildUrl)
         color: 0x47E77A,
         author:
         {
-          name: 'Rockefeller',
+          name: guildName,
           icon_url: guildUrl
         },
         fields:
