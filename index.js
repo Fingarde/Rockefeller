@@ -20,6 +20,8 @@ client.on('message', (msg) =>
   let args = msg.content.substring(1).split(' ')
   let cmd = args[0].toLowerCase()
   let name = ''
+  let guildName = msg.guild.name
+  let guildUrl = getImage(guildName)
 
   args.forEach(arg =>
   {
@@ -31,39 +33,46 @@ client.on('message', (msg) =>
   switch(cmd)
   {
     case 'add':
-      add(msg, name)
+      add(msg, name, guildName, guildUrl)
       break
     case 'list':
-      list(msg)
+      list(msg, guildName, guildUrl)
       break
     case 'remove':
-      remove(msg, name)
+      remove(msg, name, guildName, guildUrl)
       break
     case 'pl':
     case 'players':
     case 'player':
-      players(msg)
+      players(msg, guildName, guildUrl)
       break  
     case 'addace':
     case 'aceadd':
-      addace(msg, name)
+      addace(msg, name, guildName, guildUrl)
       break
     case 'listace':
     case 'acelist':
-      listace(msg)
+      listace(msg, guildName, guildUrl)
       break
     case 'removeace':
     case 'aceremove':
-      removeace(msg, name)
+      removeace(msg, name, guildName, guildUrl)
       break  
     default:
       return  
   }
 
-    console.log(`${msg.author.username} (${msg.member.displayName}) a utilisé la commande ${msg.content.substring(1)}`)
+    console.log(`${msg.guild.name}: ${msg.author.username} (${msg.member.displayName}) a utilisé la commande ${msg.content.substring(1)}`)
 })
 
-function players(msg)
+function getImage(guildName) {
+  if(guildName.toLowerCase() == 'rockefeller') return 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+  if(guildName.toLowerCase() == 'ace') return 'https://cdn.discordapp.com/icons/540609572314939394/bbd4b1d5437b3feda2fe13ac4884f118.png'
+
+  return 'https://cdn.discordapp.com/avatars/538806157196656640/8558918be6f9b89317098e26028b2926.png'
+}
+
+function players(msg, guildName, guildUrl)
 {
   request('https://arma3-servers.net/server/15936/', function (error, response, html) 
   {
@@ -85,9 +94,8 @@ function players(msg)
                 color: 0xff3333,
                 author:
                 {
-                  name: 'Rockefeller',
-                  url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-                  icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+                  name: guildName,
+                  icon_url: guildUrl
                 },
                 description: 'Le serveur est en train de redémarrer'
               }
@@ -103,9 +111,8 @@ function players(msg)
                     color: 0xff3333,
                     author:
                     {
-                      name: 'Rockefeller',
-                      url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-                      icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+                      name: guildName,
+                      icon_url: guildUrl
                     },
                     description: 'Il n\'y a pas de joueur ajouté'
                   }
@@ -121,9 +128,8 @@ function players(msg)
                     color: 0xff3333,
                     author:
                     {
-                      name: 'Rockefeller',
-                      url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-                      icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+                      name: guildName,
+                      icon_url: guildUrl
                     },
                     description: 'ACE: Il n\'y a pas de joueur ajouté'
                   }
@@ -182,20 +188,19 @@ function players(msg)
             {
             embed: 
                   {
-                  description: `󠀀󠀀\nJoueurs en ligne : **${onlinePlayers.length}** | Membres en ligne **${players.length}**`,
+                  description: `󠀀󠀀\nJoueurs en ligne : **${onlinePlayers.length}**`,
                   color: 5301186,
                   author: {
-                      name: 'Rockefeller',
-                      url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-                      icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+                      name: guildName,
+                      icon_url: guildUrl
                   },
                   fields: [
                       {
-                          name: 'Membres',
+                          name: `Membres de Rockefeller: **${players.length}**`,
                           value: embedMembers
                       },
                       {
-                        name: 'Membres de l\'unité Ace',
+                        name: `Membres de l\'unité Ace : **${aceplayers.length}**`,
                         value: embedAceMembers
                     }     
                   ]  
@@ -205,10 +210,28 @@ function players(msg)
   })
 }
 
-function add(msg, name)
+function add(msg, name, guildName, guildUrl)
 {
   let members = ''
   let currentMembers = getMembers()
+
+  if(guildName != 'Rockefeller')
+  {
+    msg.channel.send(
+      {
+        embed: {
+          color: 0xff3333,
+          author:
+          {
+            name: guildName,
+            icon_url: guildUrl
+          },
+            description: `${guildName} n\'a pas la permission de changer les membres de rockefeller`
+          }
+        })
+
+      return
+  }
 
   if(currentMembers != null)
   {
@@ -220,9 +243,8 @@ function add(msg, name)
             color: 0xff3333,
             author:
             {
-              name: 'Rockefeller',
-              url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-              icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+              name: guildName,
+              icon_url: guildUrl
             },
             description: `Le joueur avec le nom ${name} a déja été ajouté`
           }
@@ -247,19 +269,36 @@ function add(msg, name)
         color: 0x47E77A,
         author:
         {
-          name: 'Rockefeller',
-          url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-          icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+          name: guildName,
+          icon_url: guildUrl
         },
         description: `Le joueur ${name} a été ajouté`
       }
     })
 }
 
-function remove(msg, name)
+function remove(msg, name, guildName, guildUrl)
 {
   let members = ''
   let currentMembers = getMembers()
+
+  if(guildName != 'Rockefeller')
+  {
+    msg.channel.send(
+      {
+        embed: {
+          color: 0xff3333,
+          author:
+          {
+            name: guildName,
+            icon_url: guildUrl
+          },
+            description: `${guildName} n\'a pas la permission de changer les membres de rockefeller`
+          }
+        })
+
+      return
+  }
 
   if(currentMembers == null)
   {
@@ -269,9 +308,8 @@ function remove(msg, name)
           color: 0xff3333,
           author:
           {
-            name: 'Rockefeller',
-            url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-            icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+            name: guildName,
+            icon_url: guildUrl
           },
           description: 'Il n\'y a pas de joueur ajouté'
         }
@@ -288,9 +326,8 @@ function remove(msg, name)
           color: 0xff3333,
           author:
           {
-            name: 'Rockefeller',
-            url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-            icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+            name: guildName,
+            icon_url: guildUrl
           },
           description: `Il n\'y a pas de joueur avec le nom ${name}`
         }
@@ -313,16 +350,15 @@ function remove(msg, name)
         color: 0x47E77A,
         author:
         {
-          name: 'Rockefeller',
-          url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-          icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+          name: guildName,
+          icon_url: guildUrl
         },
         description: `Le joueur ${name} a été retiré`
       }
     })
 }
 
-function list(msg)
+function list(msg, guildName, guildUrl)
 {
   let currentMembers = getMembers()
   let msgPlayer = ''
@@ -335,9 +371,8 @@ function list(msg)
           color: 0xff3333,
           author:
           {
-            name: 'Rockefeller',
-            url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-            icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+            name: guildName,
+            icon_url: guildUrl
           },
           description: 'Il n\'y a pas de joueur ajouté'
         }
@@ -358,9 +393,8 @@ function list(msg)
         color: 0x47E77A,
         author:
         {
-          name: 'Rockefeller',
-          url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-          icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+          name: guildName,
+          icon_url: guildUrl
         },
         fields:
         [{
@@ -371,7 +405,7 @@ function list(msg)
     })
 }
 
-function addace(msg, name)
+function addace(msg, name, guildName, guildUrl)
 {
   let members = ''
   let currentMembers = getAceMembers()
@@ -386,9 +420,8 @@ function addace(msg, name)
             color: 0xff3333,
             author:
             {
-              name: 'Rockefeller',
-              url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-              icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+              name: guildName,
+              icon_url: guildUrl
             },
             description: `ACE: Le joueur avec le nom ${name} a déja été ajouté`
           }
@@ -413,16 +446,15 @@ function addace(msg, name)
         color: 0x47E77A,
         author:
         {
-          name: 'Rockefeller',
-          url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-          icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+          name: guildName,
+          icon_url: guildUrl
         },
         description: `ACE: Le joueur ${name} a été ajouté`
       }
     })
 }
 
-function removeace(msg, name)
+function removeace(msg, name, guildName, guildUrl)
 {
   let members = ''
   let currentMembers = getAceMembers()
@@ -435,9 +467,8 @@ function removeace(msg, name)
           color: 0xff3333,
           author:
           {
-            name: 'Rockefeller',
-            url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-            icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+            name: guildName,
+            icon_url: guildUrl
           },
           description: 'ACE: Il n\'y a pas de joueur ajouté'
         }
@@ -454,9 +485,8 @@ function removeace(msg, name)
           color: 0xff3333,
           author:
           {
-            name: 'Rockefeller',
-            url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-            icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+            name: guildName,
+            icon_url: guildUrl
           },
           description: `ACE: Il n\'y a pas de joueur avec le nom ${name}`
         }
@@ -480,15 +510,14 @@ function removeace(msg, name)
         author:
         {
           name: 'Rockefeller',
-          url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-          icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+          icon_url: guildUrl
         },
         description: `ACE: Le joueur ${name} a été retiré`
       }
     })
 }
 
-function listace(msg)
+function listace(msg, guildName, guildUrl)
 {
   let currentMembers = getAceMembers()
   let msgPlayer = ''
@@ -502,8 +531,7 @@ function listace(msg)
           author:
           {
             name: 'Rockefeller',
-            url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-            icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+            icon_url: guildUrl
           },
           description: 'ACE: Il n\'y a pas de joueur ajouté'
         }
@@ -525,8 +553,7 @@ function listace(msg)
         author:
         {
           name: 'Rockefeller',
-          url: 'https://docs.google.com/spreadsheets/d/1N4pZYRc6TkA00hqTKure28RnM6tpycFltjOy_Cl88n4/edit?usp=sharing',
-          icon_url: 'https://cdn.discordapp.com/icons/531190657784479755/79048b6aabae4060813b3fb5105f19b0.png'
+          icon_url: guildUrl
         },
         fields:
         [{
